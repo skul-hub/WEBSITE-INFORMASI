@@ -1,34 +1,3 @@
-<think>
-<think>
-Pertama, pengguna meminta "Lanjut yang script dri awal script.jsnya", yang berarti "Continue the script from the beginning of script.js". Ini karena respons sebelumnya terpotong di tengah kode JS.
-
-
-## Interpreting User Request
-- The user asked, "Lanjut yang script dri awal script.jsnya," meaning "Continue the script from the beginning of script.js."
-- This suggests the previous response was cut off mid-JavaScript code, and they want the script resumed from the start.
-
-## Extending Script Details  
-- Found the complete `js/script.js` code, starting with Supabase configuration using placeholders for URL and anonymous key.  
-- Includes initialization of Supabase client and setting admin password as "ADMIN," case-sensitive.  
-
-## Implementing Data Fetching  
-- Added functions to fetch carousel and news data asynchronously from Supabase, with error handling returning empty arrays.  
-- Each fetch function logs errors to console if data retrieval fails.  
-
-## Building UI Components  
-- Created `displayCarousel` function to render fetched carousel data into HTML, clearing existing content first.  
-- Each carousel slide includes image, title, and description, dynamically added to the `carousel-container` element.
-
-## Extending UI Editing
-
-- Added `displayNewsEditor` function to render editable news forms, including title, summary, and image fields, with delete buttons for each item.
-</think><think>
-Pertama, pengguna meminta "Lanjut yang script dri awal script.jsnya", yang berarti "Continue the script from the beginning of script.js". Ini karena respons sebelumnya terpotong di tengah kode JS.
-
-</think>Berikut adalah lanjutan dan kode lengkap untuk `js/script.js` (dari awal, tanpa potongan). Ini adalah file JS lengkap dengan semua fungsi untuk website, termasuk integrasi Supabase, login admin dengan password "ADMIN", dan kontrol carousel/news.
-
-### js/script.js (Lengkap dari Awal)
-```javascript
 // Konfigurasi Supabase (ganti dengan URL dan key Anda)
 const SUPABASE_URL = 'YOUR_SUPABASE_URL'; // Misalnya: https://your-project.supabase.co
 const SUPABASE_ANON_KEY = 'YOUR_ANON_KEY'; // Anon public key dari Supabase
@@ -247,6 +216,33 @@ async function addNewsItem() {
 async function deleteCarousel(id) {
     await supabaseClient.from('carousel').delete().eq('id', id);
     loadCarouselEditor();
+}
+
+// Fungsi untuk hapus news
+async function deleteNews(id) {
+    await supabaseClient.from('news').delete().eq('id', id);
+    loadNewsEditor();
+}
+
+// Jalankan fungsi saat halaman load
+document.addEventListener('DOMContentLoaded', async () => {
+    if (window.location.pathname.includes('admin.html')) {
+        if (adminLogin()) {
+            loadCarouselEditor();
+            loadNewsEditor();
+            document.getElementById('add-carousel-slide').addEventListener('click', addCarouselSlide);
+            document.getElementById('save-carousel').addEventListener('click', saveCarousel);
+            document.getElementById('add-news-item').addEventListener('click', addNewsItem);
+            document.getElementById('save-news').addEventListener('click', saveNews);
+        }
+    } else {
+        await displayCarousel();
+        await displayNews();
+        controlCarousel();
+        handleContactForm();
+        showWelcomeModal();
+    }
+}); loadCarouselEditor();
 }
 
 // Fungsi untuk hapus news
