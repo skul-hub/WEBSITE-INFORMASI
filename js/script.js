@@ -1,13 +1,44 @@
+<think>
+<think>
+Pertama, pengguna meminta "Lanjut yang script dri awal script.jsnya", yang berarti "Continue the script from the beginning of script.js". Ini karena respons sebelumnya terpotong di tengah kode JS.
+
+
+## Interpreting User Request
+- The user asked, "Lanjut yang script dri awal script.jsnya," meaning "Continue the script from the beginning of script.js."
+- This suggests the previous response was cut off mid-JavaScript code, and they want the script resumed from the start.
+
+## Extending Script Details  
+- Found the complete `js/script.js` code, starting with Supabase configuration using placeholders for URL and anonymous key.  
+- Includes initialization of Supabase client and setting admin password as "ADMIN," case-sensitive.  
+
+## Implementing Data Fetching  
+- Added functions to fetch carousel and news data asynchronously from Supabase, with error handling returning empty arrays.  
+- Each fetch function logs errors to console if data retrieval fails.  
+
+## Building UI Components  
+- Created `displayCarousel` function to render fetched carousel data into HTML, clearing existing content first.  
+- Each carousel slide includes image, title, and description, dynamically added to the `carousel-container` element.
+
+## Extending UI Editing
+
+- Added `displayNewsEditor` function to render editable news forms, including title, summary, and image fields, with delete buttons for each item.
+</think><think>
+Pertama, pengguna meminta "Lanjut yang script dri awal script.jsnya", yang berarti "Continue the script from the beginning of script.js". Ini karena respons sebelumnya terpotong di tengah kode JS.
+
+</think>Berikut adalah lanjutan dan kode lengkap untuk `js/script.js` (dari awal, tanpa potongan). Ini adalah file JS lengkap dengan semua fungsi untuk website, termasuk integrasi Supabase, login admin dengan password "ADMIN", dan kontrol carousel/news.
+
+### js/script.js (Lengkap dari Awal)
+```javascript
 // Konfigurasi Supabase (ganti dengan URL dan key Anda)
 const SUPABASE_URL = 'YOUR_SUPABASE_URL'; // Misalnya: https://your-project.supabase.co
 const SUPABASE_ANON_KEY = 'YOUR_ANON_KEY'; // Anon public key dari Supabase
 
-// Inisialisasi Supabase Client (pastikan script Supabase dimuat di HTML)
+// Inisialisasi Supabase Client
 const { createClient } = supabase;
 const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-// Password admin (ubah ini untuk keamanan)
-const ADMIN_PASSWORD = 'admin123'; // Ganti dengan password kuat
+// Password admin (ubah menjadi 'ADMIN')
+const ADMIN_PASSWORD = 'ADMIN'; // Case-sensitive
 
 // Fungsi untuk fetch data carousel dari Supabase
 async function fetchCarouselData() {
@@ -243,3 +274,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         showWelcomeModal();
     }
 });
+```
+
+### Penjelasan Singkat
+- **Ganti Placeholder**: Ubah `YOUR_SUPABASE_URL` dan `YOUR_ANON_KEY` dengan data dari Supabase Anda.
+- **Deploy**: Push ke GitHub, import ke Vercel. Akses admin via `yoursite.com/admin.html` dengan password "ADMIN".
+- Jika ada error atau perlu perubahan, beri tahu saya! Kode ini lengkap dan siap pakai.
