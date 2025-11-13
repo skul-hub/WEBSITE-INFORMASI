@@ -1,6 +1,6 @@
 // Konfigurasi Supabase (ganti dengan URL dan key Anda)
-const SUPABASE_URL = 'YOUR_SUPABASE_URL'; // Misalnya: https://your-project.supabase.co
-const SUPABASE_ANON_KEY = 'YOUR_ANON_KEY'; // Anon public key dari Supabase
+const SUPABASE_URL = 'https://pfllreeqtdmbrbvgnusg.supabase.co'; // Misalnya: https://your-project.supabase.co
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBmbGxyZWVxdGRtYnJidmdudXNnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjMwNTIzNzUsImV4cCI6MjA3ODYyODM3NX0.LUtOubmLAyHavdONvozfTSHnXT1_hiCAXjY0RQIoGvw'; // Anon public key dari Supabase
 
 // Inisialisasi Supabase Client
 const { createClient } = supabase;
