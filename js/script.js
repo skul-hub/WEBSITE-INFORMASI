@@ -1,6 +1,6 @@
 // js/script.js - FINAL (replace SUPABASE values)
-const SUPABASE_URL = "YOUR_SUPABASE_URL";
-const SUPABASE_ANON_KEY = "YOUR_SUPABASE_ANON_KEY";
+const SUPABASE_URL = "https://abzvqnbgihmocgphclxr.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFienZxbmJnaWhtb2NncGhjbHhyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjMwOTM5NzAsImV4cCI6MjA3ODY2OTk3MH0.FISEW24b5i9ut6FYnNkQW8k-QksxOfMWCGDkO45TemY";
 
 const { createClient } = supabase;
 const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
