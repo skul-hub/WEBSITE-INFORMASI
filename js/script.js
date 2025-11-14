@@ -1,75 +1,103 @@
-// js/script.js
-// Supabase config (pakai yang sudah ada). Ganti jika perlu.
-const SUPABASE_URL = 'https://pfllreeqtdmbrbvgnusg.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBmbGxyZWVxdGRtYnJidmdudXNnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjMwNTIzNzUsImV4cCI6MjA3ODYyODM3NX0.LUtOubmLAyHavdONvozfTSHnXT1_hiCAXjY0RQIoGvw';
+// js/script.js - FINAL (replace SUPABASE values)
+const SUPABASE_URL = "YOUR_SUPABASE_URL";
+const SUPABASE_ANON_KEY = "YOUR_SUPABASE_ANON_KEY";
 
 const { createClient } = supabase;
 const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-// ADMIN CREDENTIALS (username / password)
+// admin cred
 const ADMIN_USERNAME = 'admin';
 const ADMIN_PASSWORD = 'adminTPI';
 
-// ---------- Helper Supabase fetch ----------
-async function fetchSlides(){
-  const { data, error } = await supabaseClient.from('carousel').select('*').order('id',{ascending:true});
-  if(error){ console.error('fetchSlides', error); return []; }
-  return data || [];
-}
-async function fetchNews(){
-  const { data, error } = await supabaseClient.from('news').select('*').order('id',{ascending:false});
-  if(error){ console.error('fetchNews', error); return []; }
-  return data || [];
-}
+// small helper
+function escapeHtml(str){ return String(str||'').replace(/[&<>"']/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[s]); }
 
-// ---------- Upload file to storage ----------
+// ------------------ DOM READY ------------------
+document.addEventListener('DOMContentLoaded', () => {
+  // admin login
+  const loginBtn = document.getElementById('login-btn');
+  if (loginBtn) {
+    loginBtn.addEventListener('click', () => {
+      const u = document.getElementById('username').value.trim();
+      const p = document.getElementById('password').value.trim();
+      if (u === ADMIN_USERNAME && p === ADMIN_PASSWORD) {
+        alert('Login berhasil!');
+        window.location.href = 'edit.html';
+      } else {
+        alert('Username atau password salah!');
+      }
+    });
+  }
+
+  // index
+  if (location.pathname.endsWith('index.html') || location.pathname === '/' || location.pathname.endsWith('/')) {
+    renderIndex();
+  }
+
+  // edit admin
+  if (location.pathname.includes('edit.html')) {
+    initAdminPanel();
+  }
+
+  // contact form
+  const contactForm = document.getElementById('contact-form');
+  if (contactForm) {
+    contactForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      alert('Terima kasih! Pesan Anda telah dikirim.');
+      contactForm.reset();
+    });
+  }
+});
+
+// ------------------ Storage upload ------------------
 async function uploadImageFile(file){
   if(!file) return null;
   const fileName = `${Date.now()}-${file.name.replace(/\s+/g,'-')}`;
   const { error } = await supabaseClient.storage.from('images').upload(fileName, file);
-  if(error){
-    alert('Gagal upload: ' + error.message);
-    console.error(error);
+  if (error) {
+    console.error('Upload error', error);
+    alert('Gagal upload gambar: ' + (error.message || error));
     return null;
   }
   const { data } = supabaseClient.storage.from('images').getPublicUrl(fileName);
   return data.publicUrl;
 }
 
-// ---------- INDEX: display carousel & news ----------
+// ------------------ INDEX: fetch & render ------------------
+async function fetchSlides(){ const { data, error } = await supabaseClient.from('carousel').select('*').order('order_index',{ascending:true}); if(error){console.error(error); return []} return data||[]; }
+async function fetchNews(){ const { data, error } = await supabaseClient.from('news').select('*').order('id',{ascending:false}); if(error){console.error(error); return []} return data||[]; }
+
 async function renderIndex(){
-  // carousel
   const track = document.getElementById('carousel-track');
   const prevBtn = document.getElementById('prev-btn');
   const nextBtn = document.getElementById('next-btn');
   const newsContainer = document.getElementById('news-container');
 
+  const slides = await fetchSlides();
+
   if(track){
-    const slides = await fetchSlides();
     track.innerHTML = '';
     slides.forEach(s => {
-      const slide = document.createElement('div');
-      slide.className = 'slide';
+      const slide = document.createElement('div'); slide.className='slide';
       slide.innerHTML = `
-        <img src="${s.image || ''}" alt="${escapeHtml(s.title || '')}" />
+        <img src="${s.image||''}" alt="${escapeHtml(s.title||'')}">
         <div class="meta">
-          <h3>${escapeHtml(s.title || '')}</h3>
-          <p>${escapeHtml(s.description || '')}</p>
+          <h3>${escapeHtml(s.title||'')}</h3>
+          <p>${escapeHtml(s.description||'')}</p>
         </div>
       `;
       track.appendChild(slide);
     });
 
-    // simple control
-    let index = 0;
-    function update(){ track.style.transform = `translateX(-${index*100}%)`; }
+    let idx = 0;
+    function update(){ track.style.transform = `translateX(-${idx*100}%)`; }
     if(prevBtn && nextBtn){
-      prevBtn.onclick = ()=>{ index = index>0?index-1:Math.max(0,track.children.length-1); update(); }
-      nextBtn.onclick = ()=>{ index = index < track.children.length-1 ? index+1 : 0; update(); }
+      prevBtn.onclick = ()=>{ idx = idx>0?idx-1:track.children.length-1; update(); }
+      nextBtn.onclick = ()=>{ idx = idx < track.children.length-1 ? idx+1 : 0; update(); }
     }
-    // auto-rotate (optional)
     if(track.children.length > 1){
-      setInterval(()=>{ index = (index+1) % Math.max(1, track.children.length); update(); }, 6000);
+      setInterval(()=>{ idx = (idx+1) % Math.max(1, track.children.length); update(); }, 6000);
     }
   }
 
@@ -77,187 +105,167 @@ async function renderIndex(){
     const news = await fetchNews();
     newsContainer.innerHTML = '';
     news.forEach(n => {
-      const card = document.createElement('div');
-      card.className = 'news-card';
-      card.innerHTML = `
-        ${n.image?`<img src="${n.image}" alt="${escapeHtml(n.title)}">` : ''}
-        <h4>${escapeHtml(n.title)}</h4>
-        <p>${escapeHtml(n.summary || '')}</p>
-      `;
-      newsContainer.appendChild(card);
+      const c = document.createElement('div'); c.className='news-card';
+      c.innerHTML = `${n.image?`<img src="${n.image}" alt="${escapeHtml(n.title)}">` : ''}<h4>${escapeHtml(n.title)}</h4><p>${escapeHtml(n.summary||'')}</p>`;
+      newsContainer.appendChild(c);
     });
   }
 }
 
-// ---------- ADMIN: login, load dashboard, CRUD ----------
-function escapeHtml(str){
-  return String(str||'').replace(/[&<>"']/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[s]);
+// ------------------ ADMIN PANEL (edit.html) ------------------
+function initAdminPanel(){
+  const addSlideBtn = document.getElementById('add-slide');
+  const addNewsBtn = document.getElementById('add-news');
+  const saveSlidesBtn = document.getElementById('save-slides');
+  const saveNewsBtn = document.getElementById('save-news');
+
+  loadAdminSlides();
+  loadAdminNews();
+
+  if(addSlideBtn) addSlideBtn.addEventListener('click', adminAddSlide);
+  if(addNewsBtn) addNewsBtn.addEventListener('click', adminAddNews);
+  if(saveSlidesBtn) saveSlidesBtn.addEventListener('click', saveSlidesOrder);
+  if(saveNewsBtn) saveNewsBtn.addEventListener('click', saveAllNewsEdits);
 }
 
-async function initAdmin(){
-  // elements
-  const loginPanel = document.getElementById('login-panel');
-  const dashboard = document.getElementById('dashboard');
-  const loginBtn = document.getElementById('login-btn');
-  const usernameInput = document.getElementById('username');
-  const passwordInput = document.getElementById('password');
+async function loadAdminSlides(){
+  const list = document.getElementById('slides-list');
+  if(!list) return;
+  list.innerHTML = 'Loading...';
+  const slides = await fetchSlides();
+  list.innerHTML = '';
+  slides.forEach(s => list.appendChild(renderAdminSlideItem(s)));
+}
 
-  // slides admin controls
-  const addSlideBtn = document.getElementById('add-slide-btn');
-  const slideFileInput = document.getElementById('slide-file');
-  const slideTitleInput = document.getElementById('slide-title');
-  const slideDescInput = document.getElementById('slide-desc');
-  const slidesList = document.getElementById('slides-list');
-  const saveSlidesBtn = document.getElementById('save-slides');
+function renderAdminSlideItem(slide){
+  const item = document.createElement('div'); item.className='item';
+  item.dataset.id = slide.id;
+  item.innerHTML = `
+    <img src="${slide.image||''}" alt="">
+    <div style="flex:1">
+      <input class="input" data-field="title" value="${escapeHtml(slide.title||'')}" />
+      <input class="input" data-field="description" value="${escapeHtml(slide.description||'')}" style="margin-top:8px;" />
+    </div>
+    <div class="actions">
+      <input type="file" data-field="file" accept="image/*" />
+      <button class="btn secondary" data-action="delete">Hapus</button>
+    </div>
+  `;
+  item.querySelector('[data-action="delete"]').addEventListener('click', async ()=>{
+    if(!confirm('Hapus slide ini?')) return;
+    const id = item.dataset.id;
+    await supabaseClient.from('carousel').delete().eq('id', id);
+    item.remove();
+  });
+  return item;
+}
 
-  // news admin controls
-  const newsTitle = document.getElementById('news-title');
-  const newsSummary = document.getElementById('news-summary');
-  const newsImageInput = document.getElementById('news-image');
-  const newsFileInput = document.getElementById('news-file');
-  const addNewsBtn = document.getElementById('add-news-btn');
-  const newsList = document.getElementById('news-list');
-  const saveNewsBtn = document.getElementById('save-news-btn');
+async function adminAddSlide(){
+  const title = document.getElementById('slide-title').value.trim();
+  const desc = document.getElementById('slide-desc').value.trim();
+  const file = document.getElementById('slide-file').files[0];
+  const current = await fetchSlides();
+  if(current.length >= 5){ alert('Maksimal 5 slide. Hapus beberapa dulu jika ingin menambah.'); return; }
+  if(!file){ alert('Pilih gambar dulu'); return; }
 
-  // login
-  loginBtn.onclick = () => {
-    const u = usernameInput.value.trim();
-    const p = passwordInput.value;
-    if(u === ADMIN_USERNAME && p === ADMIN_PASSWORD){
-      loginPanel.style.display = 'none';
-      dashboard.style.display = 'block';
-      loadAdminData();
-    } else {
-      alert('Username atau password salah.');
+  const url = await uploadImageFile(file);
+  if(!url) return;
+  const order_index = (current.length>0)?Math.max(...current.map(s=>s.order_index||0))+1:0;
+
+  const { error } = await supabaseClient.from('carousel').insert([{ title, description:desc, image:url, order_index }]);
+  if(error){ console.error(error); alert('Gagal menambah slide'); return; }
+  alert('Slide ditambahkan');
+  document.getElementById('slide-title').value=''; document.getElementById('slide-desc').value=''; document.getElementById('slide-file').value='';
+  loadAdminSlides();
+}
+
+async function saveSlidesOrder(){
+  const list = document.getElementById('slides-list');
+  if(!list) return;
+  const items = [...list.querySelectorAll('.item')];
+  for(let i=0;i<items.length;i++){
+    const it = items[i];
+    const id = it.dataset.id;
+    const title = it.querySelector('[data-field="title"]').value;
+    const description = it.querySelector('[data-field="description"]').value;
+    const fileInput = it.querySelector('[data-field="file"]');
+    let image = it.querySelector('img') ? it.querySelector('img').src : null;
+    if(fileInput && fileInput.files && fileInput.files[0]){
+      const url = await uploadImageFile(fileInput.files[0]);
+      if(url) image = url;
     }
-  };
-
-  // load admin data
-  async function loadAdminData(){
-    // slides
-    slidesList.innerHTML = '';
-    const slides = await fetchSlides();
-    slides.forEach(s => slidesList.appendChild(renderSlideItem(s)));
-    // news
-    newsList.innerHTML = '';
-    const news = await fetchNews();
-    news.forEach(n => newsList.appendChild(renderNewsItem(n)));
+    await supabaseClient.from('carousel').update({ title, description, image, order_index: i }).eq('id', id);
   }
+  alert('Perubahan slide disimpan.');
+  loadAdminSlides();
+}
 
-  // render slide item (editable)
-  function renderSlideItem(slide){
-    const item = document.createElement('div'); item.className='item';
-    item.dataset.id = slide.id;
-    item.innerHTML = `
-      <img src="${slide.image||''}" alt="">
-      <div style="flex:1">
-        <input class="input" data-field="title" value="${escapeHtml(slide.title||'')}" />
-        <input class="input" data-field="description" value="${escapeHtml(slide.description||'')}" />
-      </div>
-      <div class="actions">
-        <input type="file" accept="image/*" data-field="file" />
-        <button class="btn secondary" data-action="delete">Hapus</button>
-      </div>
-    `;
-    // delete handler
-    item.querySelector('[data-action="delete"]').onclick = async ()=>{
-      if(!confirm('Hapus slide ini?')) return;
-      const id = item.dataset.id;
-      await supabaseClient.from('carousel').delete().eq('id', id);
-      item.remove();
-    };
-    return item;
+// ------------------ NEWS ADMIN ------------------
+async function loadAdminNews(){
+  const list = document.getElementById('news-list');
+  if(!list) return;
+  list.innerHTML = 'Loading...';
+  const news = await fetchNews();
+  list.innerHTML = '';
+  news.forEach(n => list.appendChild(renderAdminNewsItem(n)));
+}
+
+function renderAdminNewsItem(n){
+  const item = document.createElement('div'); item.className='item';
+  item.dataset.id = n.id;
+  item.innerHTML = `
+    ${n.image?`<img src="${n.image}" />`:`<div style="width:80px;height:56px;background:#0b0b0b;border-radius:8px"></div>`}
+    <div style="flex:1">
+      <input class="input" data-field="title" value="${escapeHtml(n.title||'')}" />
+      <textarea class="input" data-field="summary" style="margin-top:8px">${escapeHtml(n.summary||'')}</textarea>
+    </div>
+    <div class="actions">
+      <input type="file" data-field="file" accept="image/*" />
+      <button class="btn secondary" data-action="delete">Hapus</button>
+    </div>
+  `;
+  item.querySelector('[data-action="delete"]').addEventListener('click', async ()=>{
+    if(!confirm('Hapus berita ini?')) return;
+    const id = item.dataset.id;
+    await supabaseClient.from('news').delete().eq('id', id);
+    item.remove();
+  });
+  return item;
+}
+
+async function adminAddNews(){
+  const title = document.getElementById('news-title').value.trim();
+  const summary = document.getElementById('news-summary').value.trim();
+  const file = document.getElementById('news-file').files[0];
+  if(!title){ alert('Judul wajib diisi'); return; }
+  let image = null;
+  if(file){ image = await uploadImageFile(file); if(!image) return; }
+  const { error } = await supabaseClient.from('news').insert([{ title, summary, image }]);
+  if(error){ console.error(error); alert('Gagal menambah berita'); return; }
+  alert('Berita ditambahkan');
+  document.getElementById('news-title').value=''; document.getElementById('news-summary').value=''; document.getElementById('news-file').value='';
+  loadAdminNews();
+}
+
+async function saveAllNewsEdits(){
+  const list = document.getElementById('news-list');
+  if(!list) return;
+  const items = [...list.querySelectorAll('.item')];
+  for(const it of items){
+    const id = it.dataset.id;
+    const title = it.querySelector('[data-field="title"]').value;
+    const summary = it.querySelector('[data-field="summary"]').value;
+    const fileInput = it.querySelector('[data-field="file"]');
+    let image = it.querySelector('img') ? it.querySelector('img').src : null;
+    if(fileInput && fileInput.files && fileInput.files[0]){
+      const url = await uploadImageFile(fileInput.files[0]);
+      if(url) image = url;
+    }
+    await supabaseClient.from('news').update({ title, summary, image }).eq('id', id);
   }
-
-  // render news item
-  function renderNewsItem(news){
-    const item = document.createElement('div'); item.className='item';
-    item.dataset.id = news.id;
-    item.innerHTML = `
-      ${news.image?`<img src="${news.image}" />`:`<div style="width:78px;height:56px;background:#f3f4f6;border-radius:8px"></div>`}
-      <div style="flex:1">
-        <input class="input" data-field="title" value="${escapeHtml(news.title||'')}" />
-        <textarea class="input" data-field="summary">${escapeHtml(news.summary||'')}</textarea>
-      </div>
-      <div class="actions">
-        <input type="file" accept="image/*" data-field="file" />
-        <button class="btn secondary" data-action="delete">Hapus</button>
-      </div>
-    `;
-    item.querySelector('[data-action="delete"]').onclick = async ()=>{
-      if(!confirm('Hapus berita ini?')) return;
-      await supabaseClient.from('news').delete().eq('id', news.id);
-      item.remove();
-    };
-    return item;
-  }
-
-  // add slide (client-side create)
-  addSlideBtn.onclick = async ()=>{
-    // limit 5
-    const existing = await fetchSlides();
-    if(existing.length >= 5){
-      alert('Maksimal 5 slide saja.');
-      return;
-    }
-
-    const file = slideFileInput.files[0];
-    let imageUrl = '';
-    if(file){
-      imageUrl = await uploadImageFile(file);
-      if(!imageUrl) return;
-    }
-    // insert row
-    const title = slideTitleInput.value.trim();
-    const description = slideDescInput.value.trim();
-    const { data, error } = await supabaseClient.from('carousel').insert([{ title, description, image: imageUrl }]).select().single();
-    if(error){ alert('Gagal tambah slide'); console.error(error); return; }
-    slidesList.prepend(renderSlideItem(data));
-    // reset inputs
-    slideTitleInput.value='';slideDescInput.value='';slideFileInput.value='';
-    alert('Slide ditambahkan (jangan lupa tekan "Simpan Semua Perubahan" untuk memastikan).');
-  };
-
-  // save slides: iterate items & update
-  saveSlidesBtn.onclick = async ()=>{
-    const items = slidesList.querySelectorAll('.item');
-    for(const it of items){
-      const id = it.dataset.id;
-      const title = it.querySelector('[data-field="title"]').value;
-      const description = it.querySelector('[data-field="description"]').value;
-      const fileInput = it.querySelector('[data-field="file"]');
-      let image = it.querySelector('img') ? it.querySelector('img').src : null;
-
-      if(fileInput && fileInput.files[0]){
-        const url = await uploadImageFile(fileInput.files[0]);
-        if(url) image = url;
-      }
-
-      await supabaseClient.from('carousel').update({ title, description, image }).eq('id', id);
-    }
-    alert('Perubahan slide disimpan.');
-    loadAdminData();
-  };
-
-  // add news
-  addNewsBtn.onclick = async ()=>{
-    const title = newsTitle.value.trim();
-    const summary = newsSummary.value.trim();
-    if(!title){ alert('Judul wajib diisi.'); return; }
-    let imageUrl = newsImageInput.value.trim() || '';
-    if(newsFileInput.files[0]){
-      const url = await uploadImageFile(newsFileInput.files[0]); if(url) imageUrl = url;
-    }
-    const { data, error } = await supabaseClient.from('news').insert([{ title, summary, image: imageUrl }]).select().single();
-    if(error){ alert('Gagal tambah berita'); console.error(error); return; }
-    newsList.prepend(renderNewsItem(data));
-    newsTitle.value='';newsSummary.value='';newsImageInput.value='';newsFileInput.value='';
-    alert('Berita ditambahkan.');
-  };
-
-  // save news: iterate & update
-  saveNewsBtn.onclick = async ()=>{
-    const items = newsList.querySelectorAll('.item');
+  alert('Perubahan berita disimpan.');
+  loadAdminNews();
+}uerySelectorAll('.item');
     for(const it of items){
       const id = it.dataset.id;
       const title = it.querySelector('[data-field="title"]').value;
