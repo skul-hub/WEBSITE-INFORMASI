@@ -1,63 +1,52 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SKULL HOSTING</title>
-    <link rel="stylesheet" href="css/style.css">
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Store Saya - Beranda</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
-    <!-- Modal Selamat Datang -->
-    <div id="welcome-modal" class="modal">
-        <div class="modal-content">
-            <span class="close-btn">&times;</span>
-            <h2>Selamat Datang di Store Saya!</h2>
-            <p>Temukan informasi terbaru tentang produk, promosi, dan event store kami. Selamat berbelanja!</p>
-            <button class="btn" id="close-modal">Tutup</button>
-        </div>
+  <header>
+    <div class="container">
+      <div class="brand">SKULL HOSTING</div>
+      <nav>
+        <ul>
+          <li><a href="index.html">Beranda</a></li>
+          <li><a href="about.html">Tentang Store</a></li>
+          <li><a href="contact.html">Kontak</a></li>
+        </ul>
+      </nav>
     </div>
+  </header>
 
-    <header>
-        <div class="container">
-            <h1>Informasi Store</h1>
-            <nav>
-                <ul>
-                    <li><a href="index.html">Beranda</a></li>
-                    <li><a href="about.html">Tentang Store</a></li>
-                    <li><a href="contact.html">Kontak</a></li>
-                </ul>
-            </nav>
+  <main class="container">
+    <section class="hero">
+      <h2>Update Terbaru</h2>
+
+      <div class="carousel panel" aria-label="Slider">
+        <div id="carousel-track" class="carousel-track"></div>
+
+        <div class="carousel-controls" aria-hidden="false">
+          <button id="prev-btn" class="btn-circle" aria-label="Prev">&larr;</button>
+          <button id="next-btn" class="btn-circle" aria-label="Next">&rarr;</button>
         </div>
-    </header>
+      </div>
 
-    <main>
-        <div class="container">
-            <section id="featured-news">
-                <h2>Update Terbaru Store</h2>
-                <!-- Carousel Slider -->
-                <div class="carousel">
-                    <div class="carousel-container" id="carousel-container">
-                        <!-- Slides akan diisi oleh JS -->
-                    </div>
-                    <button class="carousel-btn prev" id="prev-btn">&#10094;</button>
-                    <button class="carousel-btn next" id="next-btn">&#10095;</button>
-                </div>
-            </section>
+      <div id="news-section">
+        <h3>Informasi Lainnya</h3>
+        <div id="news-container" class="news-grid"></div>
+      </div>
+    </section>
+  </main>
 
-            <section id="news-list">
-                <h2>Informasi Lainnya</h2>
-                <div id="news-container"></div>
-            </section>
-        </div>
-    </main>
+  <footer>
+    <div class="container">
+      <p>&copy; 2025 Store Saya. Semua hak dilindungi.</p>
+    </div>
+  </footer>
 
-    <footer>
-        <div class="container">
-            <p>&copy; 2025 Store Saya. Semua hak dilindungi.</p>
-        </div>
-    </footer>
-
-    <script src="js/script.js"></script>
+  <script src="js/script.js"></script>
 </body>
 </html>
